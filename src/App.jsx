@@ -4,7 +4,7 @@ import { changeText, add, delAsyncTodo, editAsyncTodo, getAsyncTodo } from './st
 import { useEffect, useState } from 'react'
 
 function App({todo}){
-  const [edit, setEdit] = useState(false)
+  const [todoId, setTodoId] = useState(null)
   const [editText, setEditText] = useState(todo?.title || '')
   const dispatch = useDispatch()
   const {text, todos} = useSelector((state) => state.todoApp)
@@ -22,11 +22,12 @@ function App({todo}){
   }
 
   const save = () => {
+    if(!id) return
     dispatch(editAsyncTodo({
       id: todo.id,
       update: {title: editText}
     }))
-    setEdit(false)
+    setTodoId(null)
   }
 
   const del = (id) => {
@@ -43,9 +44,19 @@ function App({todo}){
           return <div className="todo" key={todo.id}>
               <input type="checkbox" checked={todo.completed} onChange={() => completed(todo.id)}/>
               {
-                edit ? <input value={editText} onChange={(e) => setEditText(e.target.value)}/> : <li>{todo.title}</li>
+                todoId === todo.id ? (
+                  <input value={editText} onChange={(e) => setEditText(e.target.value)}/> 
+                ) : (
+                  <li>{todo.title}</li>
+                )
               }
-              <button onClick={edit ? save : () => setEdit(true)}>{edit ? 'save' : 'edit'}</button>
+              <button onClick={() => {if(todoId === todo.id){
+                save(todo.id)
+              }else{
+                setEditText(todo.title)
+                setTodoId(todo.id)
+              }
+              }}>{todoId === todo.id ? 'save' : 'edit'}</button>
               <button onClick={() => del(todo.id)}>delete</button>
             </div>
         })
